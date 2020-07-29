@@ -12,7 +12,8 @@ def login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         print(username, password)
-        return redirect('/index/')
+        if username.strip() and password:
+            return redirect('/index/')
     return render(request, 'login/login.html')
 
 
