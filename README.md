@@ -27,4 +27,17 @@ urlpatterns = [
 ]
 ```
 
+## settings配置：
 
+1. 在INSTALLED_APPS中添加‘login’，'captcha'
+2. 默认使用Sqlite数据库
+3. LANGUAGE_CODE = 'zh-hans'
+4. TIME_ZONE = 'Asia/Shanghai'
+5. USE_TZ = False
+
+# 邮件服务设置
+6. EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+7. EMAIL_HOST = 'smtp.sina.com'
+8. EMAIL_PORT = 25
+9. EMAIL_HOST_USER = 'xxxx@sina.com'
+10. EMAIL_HOST_PASSWORD = 'xxxxx'
