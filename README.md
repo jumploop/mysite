@@ -43,3 +43,6 @@ urlpatterns = [
 10. EMAIL_HOST_PASSWORD = 'xxxxx'
 # 注册有效期天数
 11. CONFIRM_DAYS = 7
+
+
+- 原文链接：https://www.liujiangblog.com/course/django/102
