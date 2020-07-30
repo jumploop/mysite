@@ -4,7 +4,8 @@ from . import models, forms
 
 # Create your views here.
 def index(request):
-    pass
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
     return render(request, 'login/index.html')
 
 
