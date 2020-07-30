@@ -41,3 +41,5 @@ urlpatterns = [
 8. EMAIL_PORT = 25
 9. EMAIL_HOST_USER = 'xxxx@sina.com'
 10. EMAIL_HOST_PASSWORD = 'xxxxx'
+# 注册有效期天数
+11. CONFIRM_DAYS = 7
