@@ -1,10 +1,19 @@
 from django.shortcuts import render, redirect
 from . import models, forms
+import hashlib
 
 
 # Create your views here.
+
+def hash_code(s, salt='mysite'):  # 加点盐
+    h = hashlib.sha256()
+    s += salt
+    h.update(s.encode())  # update方法只接收bytes类型
+    return h.hexdigest()
+
+
 def index(request):
-    if not request.session.get('is_login',None):
+    if not request.session.get('is_login', None):
         return redirect('/login/')
     return render(request, 'login/index.html')
 
@@ -23,11 +32,10 @@ def login(request):
             except:
                 message = '用户不存在！'
                 return render(request, 'login/login.html', locals())
-            if user.password == password:
+            if user.password == hash_code(password):
                 request.session['is_login'] = True
                 request.session['user_id'] = user.id
                 request.session['user_name'] = user.name
-                print(username, password)
                 return redirect('/index/')
             else:
                 message = '密码不正确！'
@@ -67,7 +75,7 @@ def register(request):
 
                 new_user = models.User()
                 new_user.name = username
-                new_user.password = password1
+                new_user.password = hash_code(password1)
                 new_user.email = email
                 new_user.sex = sex
                 new_user.save()
@@ -83,5 +91,5 @@ def logout(request):
     if not request.session.get('is_login', None):
         # 如果本来就未登录，也就没有登出一说
         return redirect("/login/")
-    request.session.flush() # 清除session信息
+    request.session.flush()  # 清除session信息
     return redirect("/login/")
