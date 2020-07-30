@@ -127,3 +127,7 @@ EMAIL_HOST = 'smtp.sina.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'liming245744@sina.com'
 EMAIL_HOST_PASSWORD = 'xxxxxx'
+
+
+# 注册有效期天数
+CONFIRM_DAYS = 7

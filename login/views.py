@@ -1,3 +1,5 @@
+import datetime
+from django.conf import settings
 from django.shortcuts import render, redirect
 from . import models, forms
 import hashlib
@@ -10,6 +12,33 @@ def hash_code(s, salt='mysite'):  # 加点盐
     s += salt
     h.update(s.encode())  # update方法只接收bytes类型
     return h.hexdigest()
+
+
+def make_confirm_string(user):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    code = hash_code(user.name, now)
+    models.ConfirmString.objects.create(code=code, user=user, )
+    return code
+
+
+def send_email(email, code):
+    from django.core.mail import EmailMultiAlternatives
+
+    subject = '来自www.yiyezhiqiu.com的注册确认邮件'
+
+    text_content = '''感谢注册www.yiyezhiqiu.com，这里是一叶知秋的博客和教程站点，专注于Python、Django和机器学习技术的分享！\
+                    如果你看到这条消息，说明你的邮箱服务器不提供HTML链接功能，请联系管理员！'''
+
+    html_content = '''
+                    <p>感谢注册<a href="http://{}/confirm/?code={}" target=blank>www.yiyezhiqiu.com</a>，\
+                    这里是一叶知秋的博客和教程站点，专注于Python、Django和机器学习技术的分享！</p>
+                    <p>请点击站点链接完成注册确认！</p>
+                    <p>此链接有效期为{}天！</p>
+                    '''.format('127.0.0.1:8000', code, settings.CONFIRM_DAYS)
+
+    msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 
 def index(request):
@@ -79,12 +108,38 @@ def register(request):
                 new_user.email = email
                 new_user.sex = sex
                 new_user.save()
+                code = make_confirm_string(new_user)
+                send_email(email, code)
+                message = '请前往邮箱进行确认！'
 
-                return redirect('/login/')
+                return render(request, 'login/confirm.html', locals())
         else:
             return render(request, 'login/register.html', locals())
     register_form = forms.RegisterForm()
     return render(request, 'login/register.html', locals())
+
+
+def user_confirm(request):
+    code = request.GET.get('code', None)
+    message = ''
+    try:
+        confirm = models.ConfirmString.objects.get(code=code)
+    except:
+        message = '无效的确认请求!'
+        return render(request, 'login/confirm.html', locals())
+
+    c_time = confirm.c_time
+    now = datetime.datetime.now()
+    if now > c_time + datetime.timedelta(settings.CONFIRM_DAYS):
+        confirm.user.delete()
+        message = '您的邮件已经过期！请重新注册!'
+        return render(request, 'login/confirm.html', locals())
+    else:
+        confirm.user.has_confirmed = True
+        confirm.user.save()
+        confirm.delete()
+        message = '感谢确认，请使用账户登录！'
+        return render(request, 'login/confirm.html', locals())
 
 
 def logout(request):
