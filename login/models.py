@@ -30,7 +30,7 @@ class ConfirmString(models.Model):
     c_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.name + ":   " + self.code
+        return f'{self.user.name}:   {self.code}'
 
     class Meta:
         ordering = ["-c_time"]
